@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 //VALIDATION
 
 const schema = Joi.object({
-  name: Joi.string().min(6).required(),
+  name: Joi.string().required(),
   email: Joi.string().min(6).email().required(),
   password: Joi.string().min(6).required(),
 });
@@ -56,8 +56,12 @@ class authController {
     if (!validPass) return res.status(400).send("Invalid password");
     // Create and assign a token
 
-    const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET);
-    res.header("token", token).send(token);
+    const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
+      expiresIn: "48h",
+    });
+    const userInfo = { token, user };
+    res.header("token", token).send(userInfo);
+    next();
   }
 }
 module.exports = new authController();
